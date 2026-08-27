@@ -38,7 +38,7 @@ final class ScriptRunner {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/bash")
         task.arguments = [url.path] + arguments
-        task.environment = ProcessInfo.processInfo.environment
+        task.environment = shellEnvironment()
 
         let pipe = Pipe()
         task.standardOutput = pipe
@@ -62,9 +62,7 @@ final class ScriptRunner {
     }
 
     static func runNode(_ scriptName: String, arguments: [String] = [], showErrors: Bool = true) throws -> String {
-        let node = ProcessInfo.processInfo.environment["NODE_OVERRIDE"]
-            ?? which("node")
-            ?? "/usr/local/bin/node"
+        let node = resolveNode() ?? "/opt/homebrew/bin/node"
         let script = DreamSkinPaths.script(scriptName)
         guard FileManager.default.fileExists(atPath: script.path) else {
             throw RunError.scriptMissing(scriptName)
@@ -72,7 +70,7 @@ final class ScriptRunner {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: node)
         task.arguments = [script.path] + arguments
-        task.environment = ProcessInfo.processInfo.environment
+        task.environment = shellEnvironment()
 
         let pipe = Pipe()
         task.standardOutput = pipe
@@ -95,12 +93,59 @@ final class ScriptRunner {
         return output
     }
 
-    private static func which(_ name: String) -> String? {
+    private static func augmentedPath() -> String {
+        let home = NSHomeDirectory()
+        let extraPaths = [
+            "/opt/homebrew/bin",
+            "/usr/local/bin",
+            "\(home)/.nvm/current/bin",
+            "\(home)/.volta/bin",
+            "\(home)/.fnm/current/bin",
+            "\(home)/.local/bin",
+        ]
+        let existing = ProcessInfo.processInfo.environment["PATH"] ?? "/usr/bin:/bin:/usr/sbin:/sbin"
+        return (extraPaths + [existing]).joined(separator: ":")
+    }
+
+    private static func shellEnvironment() -> [String: String] {
+        var env = ProcessInfo.processInfo.environment
+        env["PATH"] = augmentedPath()
+        if env["NODE_OVERRIDE"] == nil, let node = resolveNode() {
+            env["NODE_OVERRIDE"] = node
+        }
+        return env
+    }
+
+    private static func resolveNode() -> String? {
+        if let override = ProcessInfo.processInfo.environment["NODE_OVERRIDE"],
+           FileManager.default.isExecutableFile(atPath: override) {
+            return override
+        }
+        let home = NSHomeDirectory()
+        let candidates = [
+            "/opt/homebrew/bin/node",
+            "/usr/local/bin/node",
+            "\(home)/.nvm/current/bin/node",
+            "\(home)/.volta/bin/node",
+            "\(home)/.fnm/current/bin/node",
+        ]
+        for path in candidates where FileManager.default.isExecutableFile(atPath: path) {
+            return path
+        }
+        return which("node", path: augmentedPath())
+    }
+
+    private static func which(_ name: String, path: String? = nil) -> String? {
         let task = Process()
         let pipe = Pipe()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/which")
         task.arguments = [name]
         task.standardOutput = pipe
+        if let path {
+            var env = ProcessInfo.processInfo.environment
+            env["PATH"] = path
+            task.environment = env
+        }
         try? task.run()
         task.waitUntilExit()
         guard task.terminationStatus == 0 else { return nil }

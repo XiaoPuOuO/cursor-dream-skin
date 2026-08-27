@@ -4,9 +4,17 @@
 
 > 非 Cursor / Anysphere 官方產品。靈感與主題格式來自 [Codex Dream Skin](https://github.com/Fei-Away/Codex-Dream-Skin)，但本工具只服務 **Cursor**，且**僅注入「Cursor Agents」獨立視窗**，不套 IDE 主視窗。
 
+## 預覽
+
+主題：**亞絲娜・星月琉璃**（`asuna-starlight-glass`）— 對話區透明、sidebar 與輸入框玻璃質感。
+
+<p align="center">
+  <img src="docs/images/preview-asuna-starlight-glass.png" alt="Cursor Agents 套用 asuna-starlight-glass 主題預覽" width="1020" />
+</p>
+
 ## 下載（一般使用者）
 
-1. 到 [Releases](https://github.com/XiaoPuOuO/cursor-dream-skin/releases) 下載 `CursorDreamSkin-v0.1.0.dmg`
+1. 到 [Releases](https://github.com/XiaoPuOuO/cursor-dream-skin/releases/latest) 下載最新 `CursorDreamSkin-vX.Y.Z.dmg`
 2. 打開 DMG，將 **Cursor Dream Skin.app** 拖入「应用程序」
 3. 從選單列點 🎨 → **套用皮膚**
 4. 若 Cursor 已在執行，App 會以 CDP 重啟 Cursor；請確保 **Cursor Agents** 視窗已開啟

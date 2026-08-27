@@ -37,11 +37,42 @@ discover_cursor_app() {
   export CURSOR_BUNDLE CURSOR_VERSION
 }
 
-require_node() {
-  NODE="${NODE_OVERRIDE:-}"
-  if [ -z "$NODE" ]; then
-    NODE="$(command -v node || true)"
+discover_node() {
+  local candidate ver
+  if [ -n "${NODE_OVERRIDE:-}" ]; then
+    printf '%s' "$NODE_OVERRIDE"
+    return 0
   fi
+  if command -v node >/dev/null 2>&1; then
+    command -v node
+    return 0
+  fi
+  for candidate in \
+    "/opt/homebrew/bin/node" \
+    "/usr/local/bin/node" \
+    "$HOME/.nvm/current/bin/node" \
+    "$HOME/.volta/bin/node" \
+    "$HOME/.fnm/current/bin/node" \
+    "$HOME/.local/share/mise/shims/node" \
+    "$HOME/.asdf/shims/node"; do
+    if [ -x "$candidate" ]; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+  done
+  if [ -d "$HOME/.nvm/versions/node" ]; then
+    ver="$(/bin/ls -1 "$HOME/.nvm/versions/node" 2>/dev/null | /usr/bin/sort -V | /usr/bin/tail -n 1 || true)"
+    candidate="$HOME/.nvm/versions/node/${ver}/bin/node"
+    if [ -n "$ver" ] && [ -x "$candidate" ]; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+require_node() {
+  NODE="$(discover_node || true)"
   [ -n "$NODE" ] || fail "找不到 node。請安裝 Node.js 22+（https://nodejs.org）。"
   major="$(/usr/bin/python3 -c 'import re,sys; print(re.sub(r"^v","",sys.argv[1]).split(".")[0])' "$("$NODE" --version)")"
   [ "$major" -ge 22 ] || fail "需要 Node.js 22+ 的 WebSocket 支援，目前為 $("$NODE" --version)。"

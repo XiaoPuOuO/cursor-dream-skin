@@ -22,7 +22,8 @@ DMG 已 **Developer ID 簽名 + Apple 公證**，一般情況下無需「仍要�
 | 還原 | 停止 injector 並清除皮膚標記 |
 | 已保存的主題 | 切換內建 / 已匯入主題 |
 | 導入主題 ZIP… | 匯入 [Codex Dream Skin](https://github.com/Fei-Away/Codex-Dream-Skin) 格式主題包 |
-| 登入時自動套用 | LaunchAgent 開機帶 CDP 啟動 Cursor |
+| 登入時自動套用皮膚 | LaunchAgent：登入後自動帶 CDP 啟動 Cursor 並注入（**每位使用者**各自開關） |
+| 登入時打開 Cursor Dream Skin | macOS 登入項目：選單列 App 自動啟動（需 App 在「应用程序」） |
 
 引擎部署路徑：`~/.cursor/cursor-dream-skin-studio/`  
 執行狀態：`~/.cursor-dream-skin/`

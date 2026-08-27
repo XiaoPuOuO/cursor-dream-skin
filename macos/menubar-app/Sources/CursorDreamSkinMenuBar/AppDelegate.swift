@@ -3,7 +3,8 @@ import DreamSkinCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-    private var autostartItem: NSMenuItem!
+    private var skinAutostartItem: NSMenuItem!
+    private var appLoginItem: NSMenuItem!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         installEngineIfNeeded()
@@ -73,10 +74,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(makeItem("導入主題 ZIP…", action: #selector(importTheme)))
         menu.addItem(.separator())
 
-        autostartItem = NSMenuItem(title: "登入時自動套用", action: #selector(toggleAutostart), keyEquivalent: "")
-        autostartItem.target = self
-        autostartItem.state = ThemeStore.autostartEnabled() ? .on : .off
-        menu.addItem(autostartItem)
+        skinAutostartItem = NSMenuItem(
+            title: "登入時自動套用皮膚",
+            action: #selector(toggleSkinAutostart),
+            keyEquivalent: ""
+        )
+        skinAutostartItem.target = self
+        skinAutostartItem.state = ThemeStore.autostartEnabled() ? .on : .off
+        menu.addItem(skinAutostartItem)
+
+        appLoginItem = NSMenuItem(
+            title: "登入時打開 Cursor Dream Skin",
+            action: #selector(toggleAppLogin),
+            keyEquivalent: ""
+        )
+        appLoginItem.target = self
+        appLoginItem.state = AppLoginItem.isEnabled() ? .on : .off
+        menu.addItem(appLoginItem)
 
         menu.addItem(makeItem("打開主題資料夾", action: #selector(openThemesFolder)))
         menu.addItem(.separator())
@@ -164,14 +178,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    @objc private func toggleAutostart() {
+    @objc private func toggleSkinAutostart() {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 if ThemeStore.autostartEnabled() {
                     _ = try ScriptRunner.run("uninstall-autostart-macos.sh")
                 } else {
                     guard let theme = self.currentThemeRelative() else {
-                        DispatchQueue.main.async { self.showInfo("請先套用一次皮膚以儲存預設主題。") }
+                        DispatchQueue.main.async {
+                            self.showInfo("請先套用一次皮膚以儲存預設主題。")
+                        }
                         return
                     }
                     _ = try ScriptRunner.run("install-autostart-macos.sh", arguments: [
@@ -181,6 +197,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 DispatchQueue.main.async { self.rebuildMenu() }
             } catch {}
+        }
+    }
+
+    @objc private func toggleAppLogin() {
+        let enable = !AppLoginItem.isEnabled()
+        do {
+            try AppLoginItem.setEnabled(enable)
+            rebuildMenu()
+            if enable && AppLoginItem.statusDescription == "requiresApproval" {
+                showInfo("已在「系統設定 → 一般 → 登入項目」加入 Cursor Dream Skin。若被關閉，請在該處手動允許。")
+            }
+        } catch {
+            showInfo(
+                "無法設定登入項目：\(error.localizedDescription)\n\n" +
+                "請確認 Cursor Dream Skin.app 已安裝在「应用程序」資料夾，且為已簽名版本。"
+            )
         }
     }
 

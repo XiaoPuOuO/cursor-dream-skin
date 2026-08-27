@@ -1,0 +1,27 @@
+{
+  "$schema": "./theme.schema.json",
+  "schema": "cursor-dream-skin-theme/1",
+  "name": "Dream Night",
+  "id": "dream-night",
+  "version": 1,
+  "appearance": "auto",
+  "background": "background.webp",
+  "opacity": {
+    "workbench": 0.58,
+    "sidebar": 0.72,
+    "panel": 0.7,
+    "editor": 0.62
+  },
+  "tint": {
+    "dark": "rgba(10, 12, 24, 0.55)",
+    "light": "rgba(245, 240, 230, 0.42)"
+  },
+  "safeArea": {
+    "position": "center",
+    "focusX": 0.5,
+    "focusY": 0.45
+  },
+  "taskMode": {
+    "raiseOpacity": 0.12
+  }
+}

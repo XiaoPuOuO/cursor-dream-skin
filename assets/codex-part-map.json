@@ -1,0 +1,91 @@
+{
+  "schema": "cursor-dream-skin-codex-map/1",
+  "description": "Codex Dream Skin Safe CSS [data-ds-part] → Cursor workbench / Agents 選擇器對照。未知 part 略過；dialog 額外映射 Agents 輸入框。",
+  "parts": {
+    "sidebar": {
+      "notes": "Codex 側欄玻璃",
+      "classic": [
+        ".monaco-workbench .part.unifiedsidebar",
+        ".monaco-workbench .part.activitybar",
+        ".monaco-workbench .part.sidebar"
+      ],
+      "classicInner": [
+        ".monaco-workbench .part.unifiedsidebar > .content",
+        ".monaco-workbench .part.sidebar > .content",
+        ".monaco-workbench .part .pane-header"
+      ],
+      "agents": ["div:has(> .ui-sidebar)"]
+    },
+    "header": {
+      "notes": "Codex 頂栏透明",
+      "classic": [
+        ".monaco-workbench .part.titlebar",
+        ".monaco-workbench .part.titlebar > .titlebar-container"
+      ],
+      "agents": []
+    },
+    "composer": {
+      "notes": "Codex 對話主區透明",
+      "classic": [
+        ".monaco-workbench .part.auxiliarybar",
+        ".monaco-workbench .part.auxiliarybar > .content",
+        ".monaco-workbench .part.auxiliarybar .composite.title"
+      ],
+      "agents": [
+        ".agent-panel",
+        ".agent-panel > .glass-agent-drop-target",
+        ".glass-agent-drop-target",
+        "div:has(.agent-panel)"
+      ]
+    },
+    "composer-toolbar": {
+      "notes": "Codex 對話工具列",
+      "classic": [],
+      "agents": ["[data-component=\"content-pane-top-bar\"]"]
+    },
+    "dialog": {
+      "notes": "Codex 對話框 / 輸入框玻璃",
+      "classic": ["[role=\"dialog\"]", ".quick-input-widget"],
+      "agents": [".ui-prompt-input__container"]
+    },
+    "panel": {
+      "notes": "Codex 底部面板（若 theme.css 有定義）",
+      "classic": [".monaco-workbench .part.panel"],
+      "agents": []
+    },
+    "statusbar": {
+      "notes": "Codex 狀態列（若 theme.css 有定義）",
+      "classic": [".monaco-workbench .part.statusbar"],
+      "agents": []
+    },
+    "menu": {
+      "notes": "Codex 選單覆蓋層",
+      "classic": ["[role=\"menu\"]"],
+      "agents": []
+    },
+    "editor": {
+      "notes": "Codex 編輯器區（若 theme.css 有定義）",
+      "classic": [
+        ".monaco-workbench .part.editor",
+        ".monaco-workbench .part.editor > .content",
+        ".monaco-workbench .editor-group-container"
+      ],
+      "agents": []
+    },
+    "card": {
+      "notes": "Codex 建議卡（classic Codex home；Cursor 無直接對應，略過或留空）",
+      "classic": [],
+      "agents": []
+    },
+    "popover": {
+      "notes": "Codex 浮層",
+      "classic": [".context-view", ".monaco-editor-overlaywidget"],
+      "agents": []
+    },
+    "banner": {
+      "notes": "Codex 橫幅區",
+      "classic": [".monaco-workbench .part.banner"],
+      "agents": []
+    }
+  }
+}

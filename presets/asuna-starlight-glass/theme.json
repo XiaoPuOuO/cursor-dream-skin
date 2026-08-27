@@ -1,0 +1,26 @@
+{
+  "schema": "cursor-dream-skin-theme/1",
+  "name": "亞絲娜・星月琉璃",
+  "id": "asuna-starlight-glass",
+  "version": 1,
+  "appearance": "dark",
+  "background": "background.png",
+  "opacity": {
+    "workbench": 0.38,
+    "sidebar": 0.22,
+    "panel": 0.45,
+    "editor": 0.32
+  },
+  "tint": {
+    "dark": "rgba(8, 11, 24, 0.12)",
+    "light": "rgba(237, 230, 255, 0.18)"
+  },
+  "safeArea": {
+    "position": "center",
+    "focusX": 0.66,
+    "focusY": 0.5
+  },
+  "taskMode": {
+    "raiseOpacity": 0.1
+  }
+}

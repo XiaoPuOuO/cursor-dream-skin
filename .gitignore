@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Swift / Xcode build
+.build/
+macos/menubar-app/.build/
+macos/menubar-app/.build-*/
+DerivedData/
+*.xcuserstate
+*.xccheckout
+
+# Release artifacts（DMG / .app 由 CI 或本機 build 產生，走 GitHub Releases）
+macos/release/
+
+# 本機執行狀態（應在 ~/.cursor-dream-skin，勿提交）
+.cursor-dream-skin/
+
+# 編輯器
+.idea/
+.vscode/
+*.swp
+*~
+
+# 日誌 / 暫存
+*.log
+*.tmp
+*.staging
+
+# Node（若日後加 devDependencies）
+node_modules/

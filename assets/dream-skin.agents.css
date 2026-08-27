@@ -1,0 +1,174 @@
+/*
+ * Cursor Dream Skin — Agents / macOS 專用 overlay
+ * 由 import-theme.mjs 附加在 Codex 編譯結果之後；Codex theme.css 不含這些錨點。
+ */
+
+/*
+ * Cursor Dream Skin — Agents / macOS 專用 overlay
+ * 由 import-theme.mjs 附加在 Codex 編譯結果之後；Codex theme.css 不含這些錨點。
+ */
+
+:root {
+  --ds-glass-message: rgba(18, 26, 49, 0.42);
+  --ds-glass-code: rgba(8, 11, 24, 0.52);
+  --ds-glass-surface: rgba(18, 26, 49, 0.32);
+}
+
+html[data-dream-skin="active"] body.cursor-glass-os-vibrancy-on,
+html[data-dream-skin="active"] body.unifiedsidebarhidden {
+  background: transparent !important;
+}
+
+/* --- 對話區容器：全透明，壁紙透出 --- */
+html[data-dream-skin="active"] .agent-panel-conversation-shell,
+html[data-dream-skin="active"] .glass-agent-drop-target,
+html[data-dream-skin="active"] .composer-bar,
+html[data-dream-skin="active"] .composer-messages-container,
+html[data-dream-skin="active"] .composer-react-transcript-root,
+html[data-dream-skin="active"] .virtualized-composer-messages-scroll-container,
+html[data-dream-skin="active"] .virtualized-composer-messages-layout,
+html[data-dream-skin="active"] .virtualized-composer-messages-content-shell,
+html[data-dream-skin="active"] .virtualized-composer-messages-virtual-plane,
+html[data-dream-skin="active"] .composer-react-virtual-plane,
+html[data-dream-skin="active"] .composer-react-virtual-plane-inner,
+html[data-dream-skin="active"] .composer-react-virtual-plane-row,
+html[data-dream-skin="active"] .composer-rendered-message,
+html[data-dream-skin="active"] .composer-message-blur,
+html[data-dream-skin="active"] .composer-human-message-container,
+html[data-dream-skin="active"] .composer-human-message-content,
+html[data-dream-skin="active"] .human-message-with-todos-wrapper,
+html[data-dream-skin="active"] .human-message-inline-body,
+html[data-dream-skin="active"] .composer-messages-standalone-sidecar-host,
+html[data-dream-skin="active"] .composer-messages-standalone-leading-sidecar-host,
+html[data-dream-skin="active"] .agent-transcript-row,
+html[data-dream-skin="active"] .agent-transcript-row-markdown,
+html[data-dream-skin="active"] .agent-transcript-row-end-of-turn-summary,
+html[data-dream-skin="active"] .agent-transcript-work-group,
+html[data-dream-skin="active"] .agent-transcript-row-work-group,
+html[data-dream-skin="active"] .agent-transcript-row-activity,
+html[data-dream-skin="active"] .agent-transcript-row-turn-actions,
+html[data-dream-skin="active"] .agent-transcript-row-tail-status,
+html[data-dream-skin="active"] .agent-transcript-tail-status,
+html[data-dream-skin="active"] .ui-collapsible,
+html[data-dream-skin="active"] .ui-collapsible-header,
+html[data-dream-skin="active"] .ui-collapsible-details,
+html[data-dream-skin="active"] .ui-step-group-header,
+html[data-dream-skin="active"] .ui-markdown,
+html[data-dream-skin="active"] .markdown-root,
+html[data-dream-skin="active"] .agent-panel-followup-input {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* 使用者訊息泡：standalone-glass 預設實色，改輕量玻璃 */
+html[data-dream-skin="active"] .composer-human-message,
+html[data-dream-skin="active"] .composer-human-message.standalone-glass {
+  background: var(--ds-glass-message) !important;
+  backdrop-filter: blur(var(--ds-blur)) saturate(1.15) brightness(1.03);
+  border: 1px solid var(--ds-line) !important;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 程式碼塊 */
+html[data-dream-skin="active"] .ui-code-block,
+html[data-dream-skin="active"] .composer-message-codeblock .ui-code-block {
+  background: var(--ds-glass-code) !important;
+  backdrop-filter: blur(20px) saturate(1.1);
+  border: 1px solid var(--ds-line) !important;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+html[data-dream-skin="active"] .ui-markdown__inline-code {
+  background: rgba(167, 199, 255, 0.1) !important;
+  border: 1px solid rgba(215, 228, 255, 0.12);
+  border-radius: 6px;
+}
+
+/* Markdown 表格 */
+html[data-dream-skin="active"] .ui-markdown__table,
+html[data-dream-skin="active"] .ui-markdown table {
+  background: transparent !important;
+  border-color: var(--ds-line) !important;
+}
+
+html[data-dream-skin="active"] .ui-markdown__th,
+html[data-dream-skin="active"] .ui-markdown__td,
+html[data-dream-skin="active"] .ui-markdown__table-cell-content {
+  background: var(--ds-glass-surface) !important;
+  border-color: var(--ds-line) !important;
+}
+
+html[data-dream-skin="active"] .divide-y.divide-border.bg-muted\/40,
+html[data-dream-skin="active"] [class*="bg-muted"] {
+  background: var(--ds-glass-surface) !important;
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+/* 捲動區底部漸層 */
+html[data-dream-skin="active"] .composer-fade-overlay {
+  background: linear-gradient(to bottom, transparent, rgba(8, 11, 24, 0.28)) !important;
+  pointer-events: none;
+}
+
+html[data-dream-skin="active"] .virtualized-composer-messages-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+html[data-dream-skin="active"] .virtualized-composer-messages-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(167, 199, 255, 0.22);
+  border-radius: 999px;
+}
+
+html[data-dream-skin="active"] .agent-prompt-input-root:focus-within .ui-prompt-input__container {
+  border-color: rgba(167, 199, 255, 0.35) !important;
+  box-shadow:
+    0 8px 36px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(167, 199, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+html[data-dream-skin="active"] .ui-sidebar-top-bar-icons .ui-icon-button,
+html[data-dream-skin="active"] .ui-sidebar-top-bar .ui-button,
+html[data-dream-skin="active"] [data-component="content-pane-top-bar"] .ui-icon-button {
+  color: rgba(245, 247, 255, 0.92) !important;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: transparent;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container:not(.empty)::before {
+  background: color-mix(in srgb, var(--ds-bg) calc(var(--ds-editor-opacity) * 100%), transparent);
+}
+
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container.empty > .editor-group-letterpress,
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container > .editor-instance {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-dream-skin="active"] [role="menu"] {
+  backdrop-filter: blur(20px) saturate(1.1);
+}
+
+html[data-dream-skin="active"] .context-view,
+html[data-dream-skin="active"] .monaco-editor-overlaywidget {
+  backdrop-filter: blur(20px) saturate(1.1);
+}
+
+html[data-dream-task-mode="on"] {
+  --ds-editor-opacity: calc(var(--ds-editor-opacity-base, 0.32) + var(--ds-task-raise, 0.1));
+  --ds-sidebar-opacity: calc(var(--ds-sidebar-opacity-base, 0.22) + var(--ds-task-raise, 0.1));
+}
+
+html[data-dream-skin="active"]:not([data-dream-art-ready="true"]) .monaco-workbench {
+  background: var(--ds-bg) !important;
+}

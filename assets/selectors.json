@@ -1,0 +1,58 @@
+{
+  "schema": "cursor-dream-skin-selectors/1",
+  "description": "Cursor workbench 選擇器契約。全部錨點由 2026-08-28 本機 loopback CDP 唯讀探測實測；tier 語意沿用 Codex Dream Skin：L1 缺失=皮膚主行為受損，L2 缺失=精修靜默降級。",
+  "verifiedAgainst": {
+    "date": "2026-08-28",
+    "cursorVersions": [
+      {
+        "version": "3.17.21",
+        "platform": "macos",
+        "evidence": "maintainer: /Applications/Cursor.app（com.todesktop.230313mzl4w4u92）隔離 profile 啟動，loopback CDP 9342 只讀探測；renderer target 為 vscode-file://…/workbench.html，逐條 querySelector 與 computed style 讀數複核"
+      }
+    ],
+    "verdict": "Cursor 是 VS Code fork，workbench 錨點以 .part.<id> + 語義 role/id 為主，穩定性顯著優於 Codex 的 CSS Modules。風險點：Cursor 3.x 把 Agent 面板渲染為 webview iframe，其內部 DOM 不在本契約範圍，壁紙無法穿透 iframe 內部。",
+    "gaps": [
+      "未驗證 Agents Window（獨立視窗）target 的外殼錨點，推定與主窗共用 workbench 結構",
+      "未驗證 light 主題下各 part 的實際色值，外觀信號目前靠 --vscode-editor-background 亮度判定",
+      "未驗證 panel 展開（terminal 開啟）時 xterm canvas 與壁紙的疊加效果"
+    ]
+  },
+  "appearanceSignal": {
+    "method": "getComputedStyle(documentElement)['--vscode-editor-background'] 解析亮度；亮度 > 0.5 判 light，否則 dark；解析失敗退回 matchMedia prefers-color-scheme",
+    "warning": "macOS 26 玻璃視窗下 body 背景為半透明 srgb，不得用作外觀信號"
+  },
+  "scopeVocabulary": {
+    "all": "主窗 workbench 全部佈局（含 side bar 開合兩態）与其上 menu / dialog 覆蓋層",
+    "editor": "編輯器區域（.part.editor 子樹）",
+    "agent": "右側 Agent 面板外殼（.part.auxiliarybar）；其 webview 內容不在皮膚範圍",
+    "layout": "佈局狀態：unifiedsidebar（合併側欄）與經典 activitybar 可能只存在其一，缺者降級不得報錯"
+  },
+  "selectors": [
+    { "key": "workbench-root", "selector": ".monaco-workbench", "tier": "L1", "scope": "all", "required": true, "notes": "根容器。實測 position:relative、z-index:1、實色 rgb(37,37,38)——壁紙層必須置於其下並讓它透明化，缺一不可" },
+    { "key": "titlebar", "selector": ".monaco-workbench .part.titlebar", "tier": "L1", "scope": "all", "required": true, "notes": "id=workbench.parts.titlebar，高 35px，實色 rgb(20,20,20)；子層 .titlebar-container 需同步透明以免壓住玻璃色" },
+    { "key": "editor", "selector": ".monaco-workbench .part.editor", "tier": "L1", "scope": "editor", "required": true, "notes": "id=workbench.parts.editor，role=main；本體已透明，壓實色的是子層 .content 與 editor-group-container（實測 rgb(24,24,24)/rgb(20,20,20)），透明化要打到這兩層" },
+    { "key": "auxiliarybar", "selector": ".monaco-workbench .part.auxiliarybar", "tier": "L1", "scope": "agent", "required": true, "notes": "id=workbench.parts.auxiliarybar，Agent/Composer 停靠位，實色 rgb(24,24,24)。外殼玻璃化後內部 webview 仍自繪不透明背景——已知限制，非注入失敗" },
+    { "key": "unifiedsidebar", "selector": ".monaco-workbench .part.unifiedsidebar", "tier": "L2", "scope": "layout", "required": false, "notes": "id=workbench.parts.unifiedsidebar，Cursor 合併側欄（探測時 214px 寬）；與 activitybar 依使用者佈局二選一，故為可選" },
+    { "key": "activitybar", "selector": ".monaco-workbench .part.activitybar", "tier": "L2", "scope": "layout", "required": false, "notes": "經典 VS Code 活動列；探測環境已啟用 unifiedsidebar 而出現 0 命中，按佈局可選處理" },
+    { "key": "sidebar", "selector": ".monaco-workbench .part.sidebar", "tier": "L2", "scope": "layout", "required": false, "notes": "id=workbench.parts.sidebar；探測時收合（0x0）但類名存在，收起時勿據此判失敗" },
+    { "key": "panel", "selector": ".monaco-workbench .part.panel", "tier": "L2", "scope": "all", "required": false, "notes": "id=workbench.parts.panel，底部面板；探測時收合 0x0，展開後含 terminal（xterm canvas 自繪背景，文字仍會疊在壁紙上）" },
+    { "key": "statusbar", "selector": ".monaco-workbench .part.statusbar", "tier": "L1", "scope": "all", "required": true, "notes": "footer.part.statusbar，高 22px 實色；透明化後狀態列文字直接疊壁紙，需保留足夠不透明度" },
+    { "key": "banner", "selector": ".monaco-workbench .part.banner", "tier": "L2", "scope": "all", "required": false, "notes": "role=banner；已半透明，僅在皮膚下統一取色" },
+    { "key": "editor-content", "selector": ".monaco-workbench .part.editor > .content", "tier": "L1", "scope": "editor", "required": true, "notes": "編輯器內容殼，實測實色 rgb(24,24,24)，壁紙能否透出完全取決於這一條" },
+    { "key": "editor-group", "selector": ".editor-group-container", "tier": "L1", "scope": "editor", "required": true, "notes": "分組容器，實色 rgb(20,20,20)" },
+    { "key": "monaco-editor", "selector": ".monaco-workbench .monaco-editor", "tier": "L1", "scope": "editor", "required": true, "notes": "代碼面；背景由 .monaco-editor-background 繪製，與本體及 .margin 一併透明化，用高不透明 surface 維持可讀性" },
+    { "key": "tabs-title", "selector": ".editor-group-container > .title", "tier": "L2", "scope": "editor", "required": false, "notes": "分頁標籤列，透明化後分頁項保持原生对比" },
+    { "key": "pane-header", "selector": ".part.sidebar .pane-header, .part.unifiedsidebar .pane-header, .part.auxiliarybar .pane-header", "tier": "L2", "scope": "layout", "required": false, "notes": "面板標題（實色 rgb(20,20,20)），玻璃化後會形成亮帶，需透明化" },
+    { "key": "aux-title", "selector": ".part.auxiliarybar .composite.title", "tier": "L2", "scope": "agent", "required": false, "notes": "Agent 面板標題列，實測與 part 同色 rgb(24,24,24)，需透明化以免與玻璃底色打架" },
+    { "key": "overlay-menu", "selector": "[role=\"menu\"]", "tier": "L2", "scope": "all", "required": false, "notes": "選單覆蓋層刻意不透明，維持可讀性" },
+    { "key": "overlay-dialog", "selector": "[role=\"dialog\"]", "tier": "L2", "scope": "all", "required": false, "notes": "對話框刻意不透明，維持可讀性" }
+  ],
+  "removed": [],
+  "stableTestids": [],
+  "notes": [
+    "錨點優先級：id(workbench.parts.*) > role > 穩定語義類（.part.<id>、.editor-group-container）；禁止依賴 Cursor 私有前綴類",
+    ".part 為靜態定位（實測 pos=static、z=auto），壁紙層用 fixed z-index:0、workbench 維持 z-index:1 即天然分層，不得改動任何 part 的 position/z-index",
+    "Agent webview（iframe）與設定頁內部為自繪表面，皮肤僅作用于外殼；跨版本升級後先對本清單跑 verify 再決定是否修 CSS",
+    "外殼錨點與 VS Code 上游同名率極高，未來改動預期以 Cursor 自有部分（auxiliarybar 內容、unifiedsidebar）為主"
+  ]
+}

@@ -1,0 +1,315 @@
+/*
+ * 亞絲娜・星月琉璃 — Cursor Dream Skin preset
+ * 配色與玻璃質感源自 asuna-starlight-glass-0.1.0/theme.css；
+ * 錨點契約見 assets/selectors.json。
+ */
+
+:root {
+  --ds-workbench-opacity: 0.38;
+  --ds-sidebar-opacity: 0.22;
+  --ds-panel-opacity: 0.45;
+  --ds-editor-opacity: 0.32;
+  --ds-tint: rgba(8, 11, 24, 0.12);
+  --ds-blur: 22px;
+  /* starlight palette（theme.json colors） */
+  --ds-bg: #080b18;
+  --ds-panel: #121a31;
+  --ds-panel-alt: #1a2244;
+  --ds-accent: #a7c7ff;
+  --ds-accent-alt: #d7e4ff;
+  --ds-line: rgba(215, 228, 255, 0.18);
+  --ds-line-strong: rgba(215, 228, 255, 0.22);
+  --ds-glass-sidebar: rgba(8, 11, 24, 0.62);
+  --ds-glass-input: rgba(18, 26, 49, 0.78);
+  --ds-glass-dialog: rgba(18, 26, 49, 0.78);
+  --ds-glass-message: rgba(18, 26, 49, 0.42);
+  --ds-glass-code: rgba(8, 11, 24, 0.52);
+  --ds-glass-surface: rgba(18, 26, 49, 0.32);
+}
+
+#cursor-dream-skin-wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-position: var(--ds-art-position, center);
+  background-size: var(--ds-art-size, cover);
+  background-repeat: no-repeat;
+  background-image: var(--ds-art-image);
+}
+
+#cursor-dream-skin-wallpaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ds-tint);
+}
+
+html[data-dream-skin="active"] .monaco-workbench {
+  background: transparent !important;
+}
+
+/* titlebar / header — 來源 theme.css 設為透明 */
+html[data-dream-skin="active"] .monaco-workbench .part.titlebar,
+html[data-dream-skin="active"] .monaco-workbench .part.titlebar > .titlebar-container {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .part.statusbar {
+  background: color-mix(in srgb, var(--ds-panel) 55%, transparent) !important;
+  border-top: 1px solid var(--ds-line);
+}
+
+html[data-dream-skin="active"] .monaco-workbench .part.banner {
+  background: color-mix(in srgb, var(--ds-panel-alt) 70%, transparent) !important;
+}
+
+/* sidebar — 對應 [data-ds-part="sidebar"] */
+html[data-dream-skin="active"] .monaco-workbench .part.unifiedsidebar,
+html[data-dream-skin="active"] .monaco-workbench .part.activitybar,
+html[data-dream-skin="active"] .monaco-workbench .part.sidebar,
+html[data-dream-skin="active"] .monaco-workbench .part.unifiedsidebar > .content,
+html[data-dream-skin="active"] .monaco-workbench .part.sidebar > .content,
+html[data-dream-skin="active"] .monaco-workbench .part .pane-header {
+  background: transparent !important;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .part.unifiedsidebar,
+html[data-dream-skin="active"] .monaco-workbench .part.activitybar,
+html[data-dream-skin="active"] .monaco-workbench .part.sidebar {
+  backdrop-filter: blur(var(--ds-blur)) saturate(1.2) brightness(1.05);
+  background: var(--ds-glass-sidebar) !important;
+  border-color: var(--ds-line);
+  border-style: solid;
+  border-width: 0 1px 0 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+}
+
+html[data-dream-skin="active"] .monaco-workbench .part .pane-header {
+  border-color: transparent !important;
+}
+
+/* panel */
+html[data-dream-skin="active"] .monaco-workbench .part.panel,
+html[data-dream-skin="active"] .monaco-workbench .part.panel .composite.title {
+  background: transparent !important;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .part.panel {
+  backdrop-filter: blur(var(--ds-blur)) saturate(1.15);
+  background: color-mix(in srgb, var(--ds-panel) calc(var(--ds-panel-opacity) * 100%), transparent) !important;
+  border-top: 1px solid var(--ds-line);
+}
+
+/* composer / auxiliarybar — Codex: composer 透明，不鋪玻璃 */
+html[data-dream-skin="active"] .monaco-workbench .part.auxiliarybar,
+html[data-dream-skin="active"] .monaco-workbench .part.auxiliarybar > .content,
+html[data-dream-skin="active"] .monaco-workbench .part.auxiliarybar .composite.title {
+  background: transparent !important;
+  border-color: transparent !important;
+  backdrop-filter: none !important;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .part.auxiliarybar {
+  border-left: none;
+}
+
+/* editor */
+html[data-dream-skin="active"] .monaco-workbench .part.editor,
+html[data-dream-skin="active"] .monaco-workbench .part.editor > .content,
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container,
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container > .title,
+html[data-dream-skin="active"] .monaco-workbench .monaco-editor,
+html[data-dream-skin="active"] .monaco-workbench .monaco-editor .monaco-editor-background,
+html[data-dream-skin="active"] .monaco-workbench .monaco-editor .margin {
+  background: transparent !important;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Codex 對話區：有開檔才鋪編輯器底膜，空窗/Agents 保持透明 */
+  background: transparent;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container:not(.empty)::before {
+  background: color-mix(in srgb, var(--ds-bg) calc(var(--ds-editor-opacity) * 100%), transparent);
+}
+
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container.empty > .editor-group-letterpress,
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container > .editor-instance {
+  position: relative;
+  z-index: 1;
+}
+
+/* dialog / overlay — 對應 [data-ds-part="dialog"] */
+html[data-dream-skin="active"] [role="menu"] {
+  backdrop-filter: blur(20px) saturate(1.1);
+}
+
+html[data-dream-skin="active"] [role="dialog"],
+html[data-dream-skin="active"] .quick-input-widget {
+  background: var(--ds-glass-dialog) !important;
+  border: 1px solid var(--ds-line-strong) !important;
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(24px) saturate(1.15);
+}
+
+html[data-dream-skin="active"] .context-view,
+html[data-dream-skin="active"] .monaco-editor-overlaywidget {
+  backdrop-filter: blur(20px) saturate(1.1);
+}
+
+html[data-dream-task-mode="on"] {
+  --ds-editor-opacity: calc(var(--ds-editor-opacity-base, 0.32) + var(--ds-task-raise, 0.1));
+  --ds-sidebar-opacity: calc(var(--ds-sidebar-opacity-base, 0.22) + var(--ds-task-raise, 0.1));
+}
+
+/* --- Cursor Agents：Codex composer 策略 — 對話區透明，僅 sidebar + input 玻璃 --- */
+
+/* 側欄玻璃：只在 .ui-sidebar 仍在 DOM 時生效（收起後 Cursor 會改掛 content-pane-top-bar） */
+html[data-dream-skin="active"] div:has(> .ui-sidebar) {
+  backdrop-filter: blur(var(--ds-blur)) saturate(1.2) brightness(1.05);
+  background: var(--ds-glass-sidebar) !important;
+  border-right: 1px solid var(--ds-line);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+}
+
+/* Agents 外殼：不依賴 .ui-sidebar 是否存在 */
+html[data-dream-skin="active"] div:has(.agent-panel) {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+html[data-dream-skin="active"] .agent-panel,
+html[data-dream-skin="active"] .agent-panel > .glass-agent-drop-target,
+html[data-dream-skin="active"] .glass-agent-drop-target {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* macOS vibrancy 全屏底：收起 sidebar 時 Cursor 會露原生 42% 黑膜 */
+html[data-dream-skin="active"] body.cursor-glass-os-vibrancy-on,
+html[data-dream-skin="active"] body.unifiedsidebarhidden {
+  background: transparent !important;
+}
+
+/* 輸入框 = Codex dialog 玻璃 */
+html[data-dream-skin="active"] .ui-prompt-input__container {
+  background: var(--ds-glass-input) !important;
+  backdrop-filter: blur(24px) saturate(1.15);
+  border: 1px solid var(--ds-line-strong) !important;
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+}
+
+html[data-dream-skin="active"] .agent-prompt-input-root:focus-within .ui-prompt-input__container {
+  border-color: rgba(167, 199, 255, 0.35) !important;
+  box-shadow:
+    0 8px 36px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(167, 199, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Agents 頂栏 chrome：展開時在 .ui-sidebar-top-bar，收起後 Cursor 改掛 content-pane-top-bar */
+html[data-dream-skin="active"] .ui-sidebar-top-bar-icons .ui-icon-button,
+html[data-dream-skin="active"] .ui-sidebar-top-bar .ui-button,
+html[data-dream-skin="active"] [data-component="content-pane-top-bar"] .ui-icon-button {
+  color: rgba(245, 247, 255, 0.92) !important;
+}
+
+/* --- Agents 對話細節：訊息泡 / 程式碼 / 表格 --- */
+
+html[data-dream-skin="active"] .agent-panel-conversation-shell,
+html[data-dream-skin="active"] .composer-bar,
+html[data-dream-skin="active"] .composer-messages-container,
+html[data-dream-skin="active"] .composer-react-transcript-root,
+html[data-dream-skin="active"] .virtualized-composer-messages-scroll-container,
+html[data-dream-skin="active"] .virtualized-composer-messages-layout,
+html[data-dream-skin="active"] .virtualized-composer-messages-content-shell,
+html[data-dream-skin="active"] .virtualized-composer-messages-virtual-plane,
+html[data-dream-skin="active"] .composer-react-virtual-plane,
+html[data-dream-skin="active"] .composer-react-virtual-plane-inner,
+html[data-dream-skin="active"] .composer-react-virtual-plane-row,
+html[data-dream-skin="active"] .composer-rendered-message,
+html[data-dream-skin="active"] .composer-message-blur,
+html[data-dream-skin="active"] .composer-human-message-container,
+html[data-dream-skin="active"] .composer-human-message-content,
+html[data-dream-skin="active"] .human-message-with-todos-wrapper,
+html[data-dream-skin="active"] .agent-transcript-row,
+html[data-dream-skin="active"] .agent-transcript-row-markdown,
+html[data-dream-skin="active"] .agent-transcript-work-group,
+html[data-dream-skin="active"] .ui-collapsible,
+html[data-dream-skin="active"] .ui-collapsible-header,
+html[data-dream-skin="active"] .ui-collapsible-details,
+html[data-dream-skin="active"] .ui-step-group-header,
+html[data-dream-skin="active"] .ui-markdown,
+html[data-dream-skin="active"] .markdown-root,
+html[data-dream-skin="active"] .agent-panel-followup-input {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+html[data-dream-skin="active"] .composer-human-message,
+html[data-dream-skin="active"] .composer-human-message.standalone-glass {
+  background: var(--ds-glass-message) !important;
+  backdrop-filter: blur(var(--ds-blur)) saturate(1.15) brightness(1.03);
+  border: 1px solid var(--ds-line) !important;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-dream-skin="active"] .ui-code-block,
+html[data-dream-skin="active"] .composer-message-codeblock .ui-code-block {
+  background: var(--ds-glass-code) !important;
+  backdrop-filter: blur(20px) saturate(1.1);
+  border: 1px solid var(--ds-line) !important;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+html[data-dream-skin="active"] .ui-markdown__inline-code {
+  background: rgba(167, 199, 255, 0.1) !important;
+  border: 1px solid rgba(215, 228, 255, 0.12);
+  border-radius: 6px;
+}
+
+html[data-dream-skin="active"] .ui-markdown__table,
+html[data-dream-skin="active"] .ui-markdown table {
+  background: transparent !important;
+  border-color: var(--ds-line) !important;
+}
+
+html[data-dream-skin="active"] .ui-markdown__th,
+html[data-dream-skin="active"] .ui-markdown__td,
+html[data-dream-skin="active"] .ui-markdown__table-cell-content {
+  background: var(--ds-glass-surface) !important;
+  border-color: var(--ds-line) !important;
+}
+
+html[data-dream-skin="active"] [class*="bg-muted"] {
+  background: var(--ds-glass-surface) !important;
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+html[data-dream-skin="active"] .composer-fade-overlay {
+  background: linear-gradient(to bottom, transparent, rgba(8, 11, 24, 0.28)) !important;
+}
+
+html[data-dream-skin="active"] .virtualized-composer-messages-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(167, 199, 255, 0.22);
+  border-radius: 999px;
+}
+
+html[data-dream-skin="active"]:not([data-dream-art-ready="true"]) .monaco-workbench {
+  background: var(--ds-bg) !important;
+}

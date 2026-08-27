@@ -1,0 +1,142 @@
+/*
+ * Cursor Dream Skin — runtime stylesheet
+ * 錨點契約見 assets/selectors.json（2026-08-28 Cursor 3.17.21 macOS 實測）。
+ * 分層策略：wallpaper 層 fixed z-index:0，.monaco-workbench 維持自身 z-index:1，
+ * 只將 workbench 與各 .part 的自繪背景透明化，不改任何 position/z-index。
+ * 變數 --ds-* 由 renderer-inject.js 依 theme.json 注入。
+ */
+
+:root {
+  --ds-workbench-opacity: 0.58;
+  --ds-sidebar-opacity: 0.72;
+  --ds-panel-opacity: 0.7;
+  --ds-editor-opacity: 0.62;
+  --ds-tint: rgba(10, 12, 24, 0.55);
+  --ds-blur: 10px;
+}
+
+/* --- 壁紙層（由 inject 掛在 body 上的節點，此處只保底樣式） --- */
+#cursor-dream-skin-wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-position: var(--ds-art-position, center);
+  background-size: var(--ds-art-size, cover);
+  background-repeat: no-repeat;
+  background-image: var(--ds-art-image);
+}
+
+#cursor-dream-skin-wallpaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ds-tint);
+}
+
+/* --- 根容器透明化 ---
+ * 實測 workbench 本體為不透明 rgb(37,37,38)，必須讓位給壁紙層 */
+html[data-dream-skin="active"] .monaco-workbench {
+  background: transparent !important;
+}
+
+/* --- 各 part 玻璃化：保留高不透明度 surface 以維持可讀性 --- */
+html[data-dream-skin="active"] .monaco-workbench .part.titlebar,
+html[data-dream-skin="active"] .monaco-workbench .part.titlebar > .titlebar-container {
+  background: transparent !important;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .part.statusbar {
+  background: color-mix(in srgb, var(--ds-tint) 60%, transparent) !important;
+}
+
+html[data-dream-skin="active"] .monaco-workbench .part.banner {
+  background: color-mix(in srgb, var(--ds-tint) 75%, transparent) !important;
+}
+
+/* 側欄家族（unifiedsidebar / activitybar / sidebar） */
+html[data-dream-skin="active"] .monaco-workbench .part.unifiedsidebar,
+html[data-dream-skin="active"] .monaco-workbench .part.activitybar,
+html[data-dream-skin="active"] .monaco-workbench .part.sidebar,
+html[data-dream-skin="active"] .monaco-workbench .part.unifiedsidebar > .content,
+html[data-dream-skin="active"] .monaco-workbench .part.sidebar > .content,
+html[data-dream-skin="active"] .monaco-workbench .part .pane-header {
+  background: transparent !important;
+}
+
+/* 側欄玻璃底：一層半透明膜，讓列表文字仍可讀 */
+html[data-dream-skin="active"] .monaco-workbench .part.unifiedsidebar,
+html[data-dream-skin="active"] .monaco-workbench .part.activitybar,
+html[data-dream-skin="active"] .monaco-workbench .part.sidebar {
+  backdrop-filter: blur(var(--ds-blur)) saturate(1.1);
+  background: color-mix(in srgb, var(--vscode-sideBar-background, #141414) calc(var(--ds-sidebar-opacity) * 100%), transparent) !important;
+}
+
+/* 底部面板 */
+html[data-dream-skin="active"] .monaco-workbench .part.panel,
+html[data-dream-skin="active"] .monaco-workbench .part.panel .composite.title {
+  background: transparent !important;
+}
+html[data-dream-skin="active"] .monaco-workbench .part.panel {
+  backdrop-filter: blur(var(--ds-blur));
+  background: color-mix(in srgb, var(--vscode-panel-background, #141414) calc(var(--ds-panel-opacity) * 100%), transparent) !important;
+}
+
+/* Agent 面板外殼（內容為 webview，無法穿透，見 selectors.json gaps） */
+html[data-dream-skin="active"] .monaco-workbench .part.auxiliarybar,
+html[data-dream-skin="active"] .monaco-workbench .part.auxiliarybar > .content,
+html[data-dream-skin="active"] .monaco-workbench .part.auxiliarybar .composite.title {
+  background: transparent !important;
+}
+html[data-dream-skin="active"] .monaco-workbench .part.auxiliarybar {
+  backdrop-filter: blur(var(--ds-blur)) saturate(1.1);
+  background: color-mix(in srgb, var(--vscode-sideBar-background, #181818) calc(var(--ds-sidebar-opacity) * 100%), transparent) !important;
+}
+
+/* --- 編輯器：外殼透明、代碼面保留 --- */
+html[data-dream-skin="active"] .monaco-workbench .part.editor,
+html[data-dream-skin="active"] .monaco-workbench .part.editor > .content,
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container,
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container > .title,
+html[data-dream-skin="active"] .monaco-workbench .monaco-editor,
+html[data-dream-skin="active"] .monaco-workbench .monaco-editor .monaco-editor-background,
+html[data-dream-skin="active"] .monaco-workbench .monaco-editor .margin {
+  background: transparent !important;
+}
+
+/* 代碼可讀性底膜：透明度由 --ds-editor-opacity 控制 */
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--vscode-editor-background, #181818) calc(var(--ds-editor-opacity) * 100%), transparent);
+}
+
+/* welcome / empty editor 佔位 */
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container.empty > .editor-group-letterpress,
+html[data-dream-skin="active"] .monaco-workbench .editor-group-container > .editor-instance {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- 覆蓋層刻意保持不透明，維持可讀性 --- */
+html[data-dream-skin="active"] [role="menu"],
+html[data-dream-skin="active"] [role="dialog"],
+html[data-dream-skin="active"] .context-view,
+html[data-dream-skin="active"] .monaco-editor-overlaywidget,
+html[data-dream-skin="active"] .quick-input-widget {
+  backdrop-filter: blur(14px);
+}
+
+/* --- 任務模式：注入器偵測到活動會話時提高表面覆蓋，降低壁紙干擾 --- */
+html[data-dream-task-mode="on"] {
+  --ds-editor-opacity: calc(var(--ds-editor-opacity-base, 0.62) + var(--ds-task-raise, 0.12));
+  --ds-sidebar-opacity: calc(var(--ds-sidebar-opacity-base, 0.72) + var(--ds-task-raise, 0.12));
+}
+
+/* --- 降級：壁紙尚未就緒時不露白底 --- */
+html[data-dream-skin="active"]:not([data-dream-art-ready="true"]) .monaco-workbench {
+  background: var(--vscode-editor-background, #181818) !important;
+}

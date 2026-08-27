@@ -8,9 +8,24 @@ final class ScriptRunner {
 
         var errorDescription: String? {
             switch self {
-            case .scriptMissing(let name): return "找不到脚本：\(name)"
-            case .failed(let code, let output): return "脚本失败 (\(code))：\(output)"
+            case .scriptMissing(let name): return "找不到腳本：\(name)"
+            case .failed(let code, let output): return "腳本失敗 (\(code))：\(output)"
             }
+        }
+    }
+
+    private static func showAlert(title: String, message: String) {
+        let work = {
+            let alert = NSAlert()
+            alert.messageText = title
+            alert.informativeText = message
+            alert.alertStyle = .warning
+            alert.runModal()
+        }
+        if Thread.isMainThread {
+            work()
+        } else {
+            DispatchQueue.main.sync(execute: work)
         }
     }
 
@@ -36,11 +51,10 @@ final class ScriptRunner {
 
         if task.terminationStatus != 0 {
             if showErrors {
-                let alert = NSAlert()
-                alert.messageText = "Cursor Dream Skin"
-                alert.informativeText = output.isEmpty ? "脚本 \(scriptName) 失败" : output
-                alert.alertStyle = .warning
-                alert.runModal()
+                showAlert(
+                    title: "Cursor Dream Skin",
+                    message: output.isEmpty ? "腳本 \(scriptName) 失敗" : output
+                )
             }
             throw RunError.failed(task.terminationStatus, output)
         }
@@ -71,11 +85,10 @@ final class ScriptRunner {
 
         if task.terminationStatus != 0 {
             if showErrors {
-                let alert = NSAlert()
-                alert.messageText = "Cursor Dream Skin"
-                alert.informativeText = output.isEmpty ? "Node 脚本 \(scriptName) 失败" : output
-                alert.alertStyle = .warning
-                alert.runModal()
+                showAlert(
+                    title: "Cursor Dream Skin",
+                    message: output.isEmpty ? "Node 腳本 \(scriptName) 失敗" : output
+                )
             }
             throw RunError.failed(task.terminationStatus, output)
         }

@@ -116,9 +116,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     "--theme", theme,
                     "--restart-existing",
                     "--save-default"
-                ])
+                ], showErrors: false)
                 DispatchQueue.main.async { self.rebuildMenu() }
-            } catch {}
+            } catch {
+                DispatchQueue.main.async {
+                    self.showInfo(error.localizedDescription)
+                }
+            }
         }
     }
 
@@ -242,9 +246,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showInfo(_ text: String) {
-        let alert = NSAlert()
-        alert.messageText = "Cursor Dream Skin"
-        alert.informativeText = text
-        alert.runModal()
+        let work = {
+            let alert = NSAlert()
+            alert.messageText = "Cursor Dream Skin"
+            alert.informativeText = text
+            alert.runModal()
+        }
+        if Thread.isMainThread {
+            work()
+        } else {
+            DispatchQueue.main.async(execute: work)
+        }
     }
 }

@@ -32,9 +32,11 @@
         ".monaco-workbench .part.auxiliarybar .composite.title"
       ],
       "agents": [
+        "[data-component=\"agent-panel\"]",
         ".agent-panel",
         ".agent-panel > .glass-agent-drop-target",
         ".glass-agent-drop-target",
+        "div:has([data-component=\"agent-panel\"])",
         "div:has(.agent-panel)"
       ]
     },

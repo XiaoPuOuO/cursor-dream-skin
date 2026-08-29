@@ -132,9 +132,13 @@ function injectExpression({ css, vars, themeConfig, artDataUrl }, expectedRevisi
     `const artUrl = ${JSON.stringify(artDataUrl)};`,
     `const revision = ${JSON.stringify(String(expectedRevision))};`,
     `const old = window[${JSON.stringify(STATE_KEY)}];`,
-    "if (old && old.revision === revision && old.styleEl && old.styleEl.isConnected) {",
+    `const existingStyle = document.getElementById(${JSON.stringify(MARKER_ID)});`,
+    `const existingWallpaper = document.getElementById(${JSON.stringify(WALLPAPER_ID)});`,
+    "if (old && old.revision === revision && existingStyle && existingStyle.isConnected && existingWallpaper && existingWallpaper.isConnected) {",
     "return JSON.stringify({ ok: true, alreadyApplied: true, revision }); }",
     "if (old && typeof old.cleanup === 'function') old.cleanup();",
+    "try { existingStyle?.remove(); } catch (e) {}",
+    "try { existingWallpaper?.remove(); } catch (e) {}",
     "const html = document.documentElement;",
     "const body = document.body;",
     `let wallpaper = document.getElementById(${JSON.stringify(WALLPAPER_ID)});`,
@@ -241,12 +245,59 @@ function verifyExpression() {
     `const wallpaper = document.getElementById(${JSON.stringify(WALLPAPER_ID)});`,
     "if (html.getAttribute('data-dream-skin') !== 'active') return { ok:false, reason:'marker missing' };",
     "if (!style || !style.textContent.length) return { ok:false, reason:'css missing' };",
-    "if (!wallpaper) return { ok:false, reason:'wallpaper missing' };",
-    "if (!document.querySelector('.agent-panel')) return { ok:false, reason:'agent-panel missing' };",
-    "if (!document.querySelector('.ui-prompt-input__container')) return { ok:false, reason:'prompt input missing' };",
+    "if (!wallpaper || !wallpaper.isConnected) return { ok:false, reason:'wallpaper missing' };",
+    "const agentPanel = document.querySelector('[data-component=\"agent-panel\"], .agent-panel');",
+    "if (!agentPanel) return { ok:false, reason:'agent-panel missing' };",
+    "const prompt = document.querySelector('.ui-prompt-input__container, .agent-prompt-input-root [class*=\"ui-prompt-input__container\"]');",
+    "if (!prompt) return { ok:false, reason:'prompt input missing' };",
     "return { ok:true, hasAgents:true, artReady: html.getAttribute('data-dream-art-ready') };",
     "})())",
   ].join("\n");
+}
+
+const VERIFY_RETRY_REASONS = new Set([
+  "marker missing",
+  "css missing",
+  "wallpaper missing",
+  "agent-panel missing",
+  "prompt input missing",
+]);
+
+function verifyDeadlineMs() {
+  return Date.now() + Math.min(Math.max(TIMEOUT_MS, 8000), 30000);
+}
+
+async function waitForVerified(rpc, { allowReinject, reinject }) {
+  const deadline = verifyDeadlineMs();
+  let reinjected = false;
+  for (;;) {
+    const v = await verifyOnce(rpc);
+    if (v.ok) {
+      if (v.artReady === "true" || v.artReady === "error") {
+        if (v.artReady === "error") throw new Error("Cursor Agents wallpaper decode failed");
+        return v;
+      }
+      if (Date.now() > deadline) throw new Error("Cursor Agents verify timeout: wallpaper not decoded");
+      await new Promise((r) => setTimeout(r, 250));
+      continue;
+    }
+    if (
+      allowReinject &&
+      !reinjected &&
+      reinject &&
+      (v.reason === "wallpaper missing" || v.reason === "css missing" || v.reason === "marker missing")
+    ) {
+      reinjected = true;
+      await reinject();
+      await new Promise((r) => setTimeout(r, 250));
+      continue;
+    }
+    if (VERIFY_RETRY_REASONS.has(v.reason) && Date.now() <= deadline) {
+      await new Promise((r) => setTimeout(r, 500));
+      continue;
+    }
+    throw new Error(`Cursor Agents verify failed: ${v.reason}`);
+  }
 }
 
 async function verifyOnce(rpc) {
@@ -259,18 +310,13 @@ async function runOnce() {
   const payload = buildPayload(readTheme());
   const revision = digest(payload.css + payload.vars + payload.themeConfig);
   const runs = await withAgentsTargets(async (rpc, target) => {
-    const out = await injectOnce(rpc, payload, revision);
-    const deadline = Date.now() + Math.min(Math.max(TIMEOUT_MS, 8000), 15000);
-    for (;;) {
-      const v = await verifyOnce(rpc);
-      if (!v.ok) throw new Error(`Cursor Agents verify failed: ${v.reason}`);
-      if (v.artReady === "true" || v.artReady === "error") {
-        if (v.artReady === "error") throw new Error("Cursor Agents wallpaper decode failed");
-        return { ...out, verify: v, title: target.title || "Cursor Agents" };
-      }
-      if (Date.now() > deadline) throw new Error("Cursor Agents verify timeout: wallpaper not decoded");
-      await new Promise((r) => setTimeout(r, 250));
-    }
+    const inject = () => injectOnce(rpc, payload, revision);
+    const out = await inject();
+    const verify = await waitForVerified(rpc, {
+      allowReinject: true,
+      reinject: inject,
+    });
+    return { ...out, verify, title: target.title || "Cursor Agents" };
   });
 
   const primary = runs[0];
@@ -313,10 +359,10 @@ async function main() {
         session = { key, ws, rpc, url: target.webSocketDebuggerUrl, title: target.title };
       }
       const out = await injectOnce(session.rpc, payload, revision);
-      if (!out.alreadyApplied) {
-        const v = await verifyOnce(session.rpc);
-        if (!v.ok) throw new Error(`watch verify Cursor Agents: ${v.reason || "unknown"}`);
-      }
+      await waitForVerified(session.rpc, {
+        allowReinject: true,
+        reinject: () => injectOnce(session.rpc, payload, revision),
+      });
     } catch {
       if (session?.ws) { try { session.ws.close(); } catch {} }
       session = null;

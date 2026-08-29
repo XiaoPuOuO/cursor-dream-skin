@@ -181,13 +181,15 @@ html[data-dream-skin="active"] div:has(> .ui-sidebar) {
 }
 
 /* Agents 外殼：不依賴 .ui-sidebar 是否存在 */
-html[data-dream-skin="active"] div:has(.agent-panel) {
+html[data-dream-skin="active"] div:has(.agent-panel),
+html[data-dream-skin="active"] div:has([data-component="agent-panel"]) {
   background: transparent !important;
   backdrop-filter: none !important;
   box-shadow: none !important;
 }
 
 html[data-dream-skin="active"] .agent-panel,
+html[data-dream-skin="active"] [data-component="agent-panel"],
 html[data-dream-skin="active"] .agent-panel > .glass-agent-drop-target,
 html[data-dream-skin="active"] .glass-agent-drop-target {
   background: transparent !important;

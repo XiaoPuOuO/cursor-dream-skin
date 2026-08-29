@@ -5,11 +5,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var skinAutostartItem: NSMenuItem!
     private var appLoginItem: NSMenuItem!
+    private var updateItem: NSMenuItem!
+    private var pendingUpdate: ReleaseInfo?
+    private var updateCheckInProgress = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         installEngineIfNeeded()
         try? FileManager.default.createDirectory(at: DreamSkinPaths.userThemesRoot, withIntermediateDirectories: true)
         setupStatusItem()
+        checkForUpdatesInBackground()
     }
 
     private func installEngineIfNeeded() {
@@ -42,22 +46,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func rebuildMenu() {
         let menu = NSMenu()
 
-        let active = ThemeStore.activeThemeName() ?? "（未套用）"
-        let status = NSMenuItem(title: "● \(active)", action: nil, keyEquivalent: "")
+        let active = ThemeStore.activeThemeName() ?? L10n.notApplied
+        let status = NSMenuItem(title: L10n.statusLine(active), action: nil, keyEquivalent: "")
         status.isEnabled = false
         menu.addItem(status)
         menu.addItem(.separator())
 
-        menu.addItem(makeItem("套用皮膚", action: #selector(applySkin)))
-        menu.addItem(makeItem("驗證", action: #selector(verifySkin)))
-        menu.addItem(makeItem("還原", action: #selector(restoreSkin)))
+        menu.addItem(makeItem(L10n.applySkin, action: #selector(applySkin)))
+        menu.addItem(makeItem(L10n.verify, action: #selector(verifySkin)))
+        menu.addItem(makeItem(L10n.restore, action: #selector(restoreSkin)))
         menu.addItem(.separator())
 
-        let themesMenu = NSMenuItem(title: "已保存的主題", action: nil, keyEquivalent: "")
+        let themesMenu = NSMenuItem(title: L10n.savedThemes, action: nil, keyEquivalent: "")
         let sub = NSMenu()
         let themes = ThemeStore.listThemes()
         if themes.isEmpty {
-            let empty = NSMenuItem(title: "（無主題）", action: nil, keyEquivalent: "")
+            let empty = NSMenuItem(title: L10n.noThemes, action: nil, keyEquivalent: "")
             empty.isEnabled = false
             sub.addItem(empty)
         } else {
@@ -71,11 +75,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         themesMenu.submenu = sub
         menu.addItem(themesMenu)
 
-        menu.addItem(makeItem("導入主題 ZIP…", action: #selector(importTheme)))
+        menu.addItem(makeItem(L10n.importTheme, action: #selector(importTheme)))
         menu.addItem(.separator())
 
         skinAutostartItem = NSMenuItem(
-            title: "登入時自動套用皮膚",
+            title: L10n.autostartSkin,
             action: #selector(toggleSkinAutostart),
             keyEquivalent: ""
         )
@@ -84,7 +88,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(skinAutostartItem)
 
         appLoginItem = NSMenuItem(
-            title: "登入時打開 Cursor Dream Skin",
+            title: L10n.autostartApp,
             action: #selector(toggleAppLogin),
             keyEquivalent: ""
         )
@@ -92,9 +96,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appLoginItem.state = AppLoginItem.isEnabled() ? .on : .off
         menu.addItem(appLoginItem)
 
-        menu.addItem(makeItem("打開主題資料夾", action: #selector(openThemesFolder)))
+        menu.addItem(makeItem(L10n.openThemesFolder, action: #selector(openThemesFolder)))
         menu.addItem(.separator())
-        menu.addItem(makeItem("退出", action: #selector(quitApp)))
+
+        let versionItem = NSMenuItem(title: L10n.versionLine(AppVersion.current), action: nil, keyEquivalent: "")
+        versionItem.isEnabled = false
+        menu.addItem(versionItem)
+
+        if let release = pendingUpdate {
+            updateItem = makeItem(L10n.downloadUpdate(release.version), action: #selector(downloadPendingUpdate))
+        } else {
+            updateItem = makeItem(
+                updateCheckInProgress ? "\(L10n.checkUpdates) …" : L10n.checkUpdates,
+                action: #selector(checkForUpdates)
+            )
+        }
+        updateItem.isEnabled = !updateCheckInProgress
+        menu.addItem(updateItem)
+
+        menu.addItem(.separator())
+        menu.addItem(makeItem(L10n.quit, action: #selector(quitApp)))
 
         statusItem.menu = menu
     }
@@ -105,9 +126,111 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return item
     }
 
+    private func checkForUpdatesInBackground() {
+        updateCheckInProgress = true
+        Task {
+            defer {
+                Task { @MainActor in
+                    self.updateCheckInProgress = false
+                    self.rebuildMenu()
+                }
+            }
+            do {
+                if let release = try await UpdateChecker.checkForUpdate() {
+                    await MainActor.run {
+                        self.pendingUpdate = release
+                        self.rebuildMenu()
+                    }
+                }
+            } catch {
+                // Silent on background failure; user can check manually.
+            }
+        }
+    }
+
+    @objc private func checkForUpdates() {
+        guard !updateCheckInProgress else { return }
+        updateCheckInProgress = true
+        rebuildMenu()
+
+        Task {
+            defer {
+                Task { @MainActor in
+                    self.updateCheckInProgress = false
+                    self.rebuildMenu()
+                }
+            }
+            do {
+                if let release = try await UpdateChecker.checkForUpdate() {
+                    await MainActor.run {
+                        self.pendingUpdate = release
+                        self.rebuildMenu()
+                        self.promptDownloadUpdate(release)
+                    }
+                } else {
+                    await MainActor.run {
+                        self.pendingUpdate = nil
+                        self.showInfo(L10n.upToDate(AppVersion.current))
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.showInfo(L10n.updateCheckFailed(error.localizedDescription))
+                }
+            }
+        }
+    }
+
+    @objc private func downloadPendingUpdate() {
+        guard let release = pendingUpdate else {
+            checkForUpdates()
+            return
+        }
+        promptDownloadUpdate(release)
+    }
+
+    private func promptDownloadUpdate(_ release: ReleaseInfo) {
+        let alert = NSAlert()
+        alert.messageText = L10n.appTitle
+        alert.informativeText = L10n.updateAvailable(release.version)
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: L10n.download)
+        alert.addButton(withTitle: L10n.later)
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        downloadUpdate(release)
+    }
+
+    private func downloadUpdate(_ release: ReleaseInfo) {
+        updateCheckInProgress = true
+        rebuildMenu()
+
+        Task {
+            defer {
+                Task { @MainActor in
+                    self.updateCheckInProgress = false
+                    self.rebuildMenu()
+                }
+            }
+            do {
+                let localURL = try await UpdateChecker.downloadDMG(release)
+                await MainActor.run {
+                    NSWorkspace.shared.open(localURL)
+                    self.showInfo(L10n.downloadComplete(localURL.path))
+                }
+            } catch {
+                await MainActor.run {
+                    if release.dmgDownloadURL == nil {
+                        NSWorkspace.shared.open(release.pageURL)
+                    }
+                    self.showInfo(L10n.downloadFailed(error.localizedDescription))
+                }
+            }
+        }
+    }
+
     @objc private func applySkin() {
         guard let theme = currentThemePath() else {
-            showInfo("請先選擇主題，或匯入主題包。")
+            showInfo(L10n.selectThemeFirst)
             return
         }
         DispatchQueue.global(qos: .userInitiated).async {
@@ -165,7 +288,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.message = "選擇 Codex 主題 ZIP 或已解壓目錄"
+        panel.message = L10n.selectThemeZip
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
         let presets = DreamSkinPaths.engineRoot.appendingPathComponent("presets")
@@ -174,10 +297,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 _ = try ScriptRunner.runNode("import-theme.mjs", arguments: [url.path, "--out", presets.path])
                 DispatchQueue.main.async {
                     self.rebuildMenu()
-                    self.showInfo("主題已匯入。")
+                    self.showInfo(L10n.themeImported)
                 }
             } catch {
-                DispatchQueue.main.async { self.showInfo("匯入失敗，請確認 ZIP 格式。") }
+                DispatchQueue.main.async { self.showInfo(L10n.importFailed) }
             }
         }
     }
@@ -190,7 +313,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 } else {
                     guard let theme = self.currentThemeRelative() else {
                         DispatchQueue.main.async {
-                            self.showInfo("請先套用一次皮膚以儲存預設主題。")
+                            self.showInfo(L10n.applyOnceFirst)
                         }
                         return
                     }
@@ -210,13 +333,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             try AppLoginItem.setEnabled(enable)
             rebuildMenu()
             if enable && AppLoginItem.statusDescription == "requiresApproval" {
-                showInfo("已在「系統設定 → 一般 → 登入項目」加入 Cursor Dream Skin。若被關閉，請在該處手動允許。")
+                showInfo(L10n.loginItemAdded)
             }
         } catch {
-            showInfo(
-                "無法設定登入項目：\(error.localizedDescription)\n\n" +
-                "請確認 Cursor Dream Skin.app 已安裝在「应用程序」資料夾，且為已簽名版本。"
-            )
+            showInfo(L10n.loginItemFailed(error.localizedDescription))
         }
     }
 
@@ -248,8 +368,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showInfo(_ text: String) {
         let work = {
             let alert = NSAlert()
-            alert.messageText = "Cursor Dream Skin"
+            alert.messageText = L10n.appTitle
             alert.informativeText = text
+            alert.addButton(withTitle: L10n.ok)
             alert.runModal()
         }
         if Thread.isMainThread {

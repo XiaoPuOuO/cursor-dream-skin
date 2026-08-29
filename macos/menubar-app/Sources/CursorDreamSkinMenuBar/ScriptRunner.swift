@@ -8,8 +8,8 @@ final class ScriptRunner {
 
         var errorDescription: String? {
             switch self {
-            case .scriptMissing(let name): return "找不到腳本：\(name)"
-            case .failed(let code, let output): return "腳本失敗 (\(code))：\(output)"
+            case .scriptMissing(let name): return L10n.scriptMissing(name)
+            case .failed(let code, let output): return L10n.scriptFailed(code, output)
             }
         }
     }
@@ -52,8 +52,8 @@ final class ScriptRunner {
         if task.terminationStatus != 0 {
             if showErrors {
                 showAlert(
-                    title: "Cursor Dream Skin",
-                    message: output.isEmpty ? "腳本 \(scriptName) 失敗" : output
+                    title: L10n.appTitle,
+                    message: output.isEmpty ? L10n.scriptFailedGeneric(scriptName) : output
                 )
             }
             throw RunError.failed(task.terminationStatus, output)
@@ -84,8 +84,8 @@ final class ScriptRunner {
         if task.terminationStatus != 0 {
             if showErrors {
                 showAlert(
-                    title: "Cursor Dream Skin",
-                    message: output.isEmpty ? "Node 腳本 \(scriptName) 失敗" : output
+                    title: L10n.appTitle,
+                    message: output.isEmpty ? L10n.nodeScriptFailed(scriptName) : output
                 )
             }
             throw RunError.failed(task.terminationStatus, output)
